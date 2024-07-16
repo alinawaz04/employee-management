@@ -7,9 +7,14 @@ import {
   FlatList,
   Switch,
   TextInput,
+  Button,
+  Modal,
+  Alert,
+  Pressable,
 } from "react-native";
 
 import EmployeeList from "../components/EmployeeList";
+import AddEmployeeModal from "../components/AddEmployeeModal";
 
 const mockEmployees = [
   {
@@ -286,10 +291,10 @@ const mockEmployees = [
 ];
 
 const EmployeeListScreen = ({ navigation }) => {
-  // manage state for switch that filters employees for whether they have incomplete tasks or not
-  const [showIncompleteOnly, setShowIncompleteOnly] = useState(false);
   const [employees, setEmployees] = useState(mockEmployees);
   const [query, setQuery] = useState("");
+  const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
+  const [showIncompleteOnly, setShowIncompleteOnly] = useState(false);
 
   const toggleSwitch = () => {
     setShowIncompleteOnly((prevState) => !prevState);
@@ -308,22 +313,33 @@ const EmployeeListScreen = ({ navigation }) => {
 
   return (
     <View>
+      <AddEmployeeModal
+        modalVisible={showAddEmployeeModal}
+        setModalVisible={setShowAddEmployeeModal}
+      />
       <TextInput
         value={query}
         onChangeText={setQuery}
         placeholder="Search Employees..."
         style={styles.search}
       />
+
       <View style={styles.switchContainer}>
         <Text> Show employees with incomplete tasks only: </Text>
         <Switch value={showIncompleteOnly} onValueChange={toggleSwitch} />
       </View>
+
       {/* render different list based on 'showIncompleteOnly' state */}
       {showIncompleteOnly ? (
         <EmployeeList data={incompleteTaskEmployees} />
       ) : (
         <EmployeeList data={filteredEmployees} />
       )}
+
+      <Button
+        title="Add Employee"
+        onPress={() => setShowAddEmployeeModal(true)}
+      />
     </View>
   );
 };
