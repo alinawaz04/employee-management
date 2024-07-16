@@ -6,7 +6,10 @@ import {
   TouchableOpacity,
   FlatList,
   Switch,
+  TextInput,
 } from "react-native";
+
+import EmployeeList from "../components/EmployeeList";
 
 const mockEmployees = [
   {
@@ -286,69 +289,62 @@ const EmployeeListScreen = ({ navigation }) => {
   // manage state for switch that filters employees for whether they have incomplete tasks or not
   const [showIncompleteOnly, setShowIncompleteOnly] = useState(false);
   const [employees, setEmployees] = useState(mockEmployees);
+  const [query, setQuery] = useState("");
 
   const toggleSwitch = () => {
     setShowIncompleteOnly((prevState) => !prevState);
   };
 
+  // filter employees by search query
+  const filteredEmployees = employees.filter((employee) => {
+    const name = (employee.firstName + employee.lastName).toLowerCase();
+    return name.toLowerCase().includes(query.toLowerCase());
+  });
+
   // list of employees with incomplete tasks
-  const incompleteTaskEmployees = employees.filter((employee) => {
+  const incompleteTaskEmployees = filteredEmployees.filter((employee) => {
     return employee.tasks.length > 0;
   });
 
   return (
     <View>
-      <Switch value={showIncompleteOnly} onValueChange={toggleSwitch} />
+      <TextInput
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Search Employees..."
+        style={styles.search}
+      />
+      <View style={styles.switchContainer}>
+        <Text> Show employees with incomplete tasks only: </Text>
+        <Switch value={showIncompleteOnly} onValueChange={toggleSwitch} />
+      </View>
+      {/* render different list based on 'showIncompleteOnly' state */}
       {showIncompleteOnly ? (
-        <FlatList
-          data={incompleteTaskEmployees}
-          renderItem={({ item }) => (
-            <View style={styles.employee}>
-              <Text>
-                {item.firstName} {item.lastName}
-              </Text>
-              {/* if employee has 5 or more active tasks: add red text color */}
-              <Text style={item.tasks.length >= 5 ? styles.alertTasks : null}>
-                Tasks: {item.tasks.length}
-              </Text>
-            </View>
-          )}
-          keyExtractor={(item) => item.id}
-        />
+        <EmployeeList data={incompleteTaskEmployees} />
       ) : (
-        <FlatList
-          data={employees}
-          renderItem={({ item }) => (
-            <View style={styles.employee}>
-              <Text>
-                {item.firstName} {item.lastName}
-              </Text>
-              {/* if employee has 5 or more active tasks: add red text color */}
-              <Text style={item.tasks.length >= 5 ? styles.alertTasks : null}>
-                Tasks: {item.tasks.length}
-              </Text>
-            </View>
-          )}
-          keyExtractor={(item) => item.id}
-        />
+        <EmployeeList data={filteredEmployees} />
       )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  employee: {
-    borderColor: "black",
-    borderWidth: 2,
+  switchContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#ACE4AA",
     margin: 5,
     padding: 5,
-    justifyContent: "space-between",
+    borderRadius: 10,
   },
 
-  // style for 5 or more active tasks:
-  alertTasks: {
-    color: "red",
+  search: {
+    color: "black",
+    borderWidth: 1,
+    height: 40,
+    margin: 5,
+    padding: 5,
   },
 });
 
