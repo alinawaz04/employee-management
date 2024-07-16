@@ -8,11 +8,13 @@ import {
   Pressable,
   Alert,
 } from "react-native";
+import { useEmployees } from "../context/EmployeeContext";
 
 const AddEmployeeModal = ({ modalVisible, setModalVisible, addEmployee }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const { updateEmployees } = useEmployees();
 
   return (
     <Modal
@@ -59,7 +61,7 @@ const AddEmployeeModal = ({ modalVisible, setModalVisible, addEmployee }) => {
             style={[styles.button, styles.buttonClose]}
             onPress={() => {
               if (firstName && lastName && email) {
-                addEmployee(firstName, lastName, email);
+                updateEmployees(firstName, lastName, email);
                 setModalVisible(!modalVisible);
               } else {
                 Alert.alert(

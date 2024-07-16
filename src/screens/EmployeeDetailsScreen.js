@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Text,
   View,
@@ -10,9 +10,14 @@ import {
   Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useEmployees } from "../context/EmployeeContext";
 
 const EmployeeDetailsScreen = ({ route }) => {
-  const { employee, updateTasks } = route.params;
+  const { id } = route.params;
+  const { employees, updateEmployeeTasks } = useEmployees();
+
+  const employee = employees.find((emp) => emp.id === id);
+
   const [tasks, setTasks] = useState(employee.tasks);
   const [modalVisible, setModalVisible] = useState(false);
   const [taskTitle, setTaskTitle] = useState("");
@@ -20,7 +25,9 @@ const EmployeeDetailsScreen = ({ route }) => {
   const [taskEndDate, setTaskEndDate] = useState(new Date());
   const [taskDescription, setTaskDescription] = useState("");
 
-  console.log(tasks);
+  useEffect(() => {
+    setTasks(employee.tasks);
+  }, [employee.tasks]);
 
   // helper function to check if end date of task is past today
   const checkDate = (date) => {
@@ -47,7 +54,7 @@ const EmployeeDetailsScreen = ({ route }) => {
       },
     ];
     setTasks(newTasks);
-    updateTasks(employee.id, newTasks); // Update tasks in parent component
+    updateEmployeeTasks(employee.id, newTasks); // Update tasks in parent component
   };
 
   const onStartDateChange = (event, selectedDate) => {
