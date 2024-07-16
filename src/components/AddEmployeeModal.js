@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -6,9 +6,14 @@ import {
   Modal,
   TextInput,
   Pressable,
+  Alert,
 } from "react-native";
 
-const AddEmployeeModal = ({ modalVisible, setModalVisible }) => {
+const AddEmployeeModal = ({ modalVisible, setModalVisible, addEmployee }) => {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+
   return (
     <Modal
       animationType="slide"
@@ -20,18 +25,48 @@ const AddEmployeeModal = ({ modalVisible, setModalVisible }) => {
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <Text style={styles.modalHeaderText}>Add Employee</Text>
-
-          <Text>Employee first name:</Text>
-          <TextInput style={styles.modalInput} placeholder="First name" />
-          <Text>Employee last name:</Text>
-          <TextInput style={styles.modalInput} placeholder="Last name" />
-          <Text>Employee email:</Text>
-          <TextInput style={styles.modalInput} placeholder="Email" />
-
           <Pressable
             style={[styles.button, styles.buttonClose]}
             onPress={() => setModalVisible(!modalVisible)}
+          >
+            <Text style={styles.textStyle}>X</Text>
+          </Pressable>
+          <Text style={styles.modalHeaderText}>Add Employee</Text>
+
+          <Text>Employee first name:</Text>
+          <TextInput
+            style={styles.modalInput}
+            placeholder="First name"
+            value={firstName}
+            onChangeText={setFirstName}
+          />
+          <Text>Employee last name:</Text>
+          <TextInput
+            style={styles.modalInput}
+            placeholder="Last name"
+            value={lastName}
+            onChangeText={setLastName}
+          />
+          <Text>Employee email:</Text>
+          <TextInput
+            style={styles.modalInput}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+          />
+
+          <Pressable
+            style={[styles.button, styles.buttonClose]}
+            onPress={() => {
+              if (firstName && lastName && email) {
+                addEmployee(firstName, lastName, email);
+                setModalVisible(!modalVisible);
+              } else {
+                Alert.alert(
+                  "Must provide first name, last name, and email to add employee"
+                );
+              }
+            }}
           >
             <Text style={styles.textStyle}>Submit</Text>
           </Pressable>

@@ -12,6 +12,7 @@ import {
   Alert,
   Pressable,
 } from "react-native";
+import uuid from "react-native-uuid";
 
 import EmployeeList from "../components/EmployeeList";
 import AddEmployeeModal from "../components/AddEmployeeModal";
@@ -296,6 +297,13 @@ const EmployeeListScreen = ({ navigation }) => {
   const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
   const [showIncompleteOnly, setShowIncompleteOnly] = useState(false);
 
+  const addEmployee = (firstName, lastName, email) => {
+    setEmployees([
+      ...employees,
+      { id: uuid.v4(), firstName, lastName, email, tasks: [] },
+    ]);
+  };
+
   const toggleSwitch = () => {
     setShowIncompleteOnly((prevState) => !prevState);
   };
@@ -316,6 +324,7 @@ const EmployeeListScreen = ({ navigation }) => {
       <AddEmployeeModal
         modalVisible={showAddEmployeeModal}
         setModalVisible={setShowAddEmployeeModal}
+        addEmployee={addEmployee}
       />
       <TextInput
         value={query}
