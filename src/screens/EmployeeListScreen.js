@@ -297,6 +297,17 @@ const EmployeeListScreen = ({ navigation }) => {
   const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
   const [showIncompleteOnly, setShowIncompleteOnly] = useState(false);
 
+  const updateTasks = (employeeId, newTasks) => {
+    setEmployees((prevEmployees) => {
+      return prevEmployees.map((employee) => {
+        if (employee.id === employeeId) {
+          return { ...employee, tasks: newTasks };
+        }
+        return employee;
+      });
+    });
+  };
+
   const addEmployee = (firstName, lastName, email) => {
     setEmployees([
       ...employees,
@@ -340,9 +351,12 @@ const EmployeeListScreen = ({ navigation }) => {
 
       {/* render different list based on 'showIncompleteOnly' state */}
       {showIncompleteOnly ? (
-        <EmployeeList data={incompleteTaskEmployees} />
+        <EmployeeList
+          data={incompleteTaskEmployees}
+          updateTasks={updateTasks}
+        />
       ) : (
-        <EmployeeList data={filteredEmployees} />
+        <EmployeeList data={filteredEmployees} updateTasks={updateTasks} />
       )}
 
       <Button

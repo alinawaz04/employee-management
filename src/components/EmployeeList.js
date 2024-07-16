@@ -13,7 +13,7 @@ import { useNavigation } from "@react-navigation/native";
  * @param data - list of employees to be rendered
  */
 
-const EmployeeList = ({ data }) => {
+const EmployeeList = ({ data, updateTasks }) => {
   const navigation = useNavigation();
 
   return (
@@ -22,7 +22,10 @@ const EmployeeList = ({ data }) => {
       renderItem={({ item }) => (
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate("EmployeeDetails", { employee: item })
+            navigation.navigate("EmployeeDetails", {
+              employee: item,
+              updateTasks,
+            })
           }
         >
           <View style={styles.employee}>
