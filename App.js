@@ -11,10 +11,15 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="EmployeeList" component={EmployeeListScreen} />
+        <Stack.Screen
+          name="EmployeeList"
+          component={EmployeeListScreen}
+          options={{ title: "Employee List" }}
+        />
         <Stack.Screen
           name="EmployeeDetails"
           component={EmployeeDetailsScreen}
+          options={{ title: "Employee Details" }}
         />
       </Stack.Navigator>
     </NavigationContainer>

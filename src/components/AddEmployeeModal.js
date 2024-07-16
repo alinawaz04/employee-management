@@ -26,7 +26,7 @@ const AddEmployeeModal = ({ modalVisible, setModalVisible, addEmployee }) => {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Pressable
-            style={[styles.button, styles.buttonClose]}
+            style={[styles.closeModal, styles.buttonClose]}
             onPress={() => setModalVisible(!modalVisible)}
           >
             <Text style={styles.textStyle}>X</Text>
@@ -119,6 +119,15 @@ const styles = StyleSheet.create({
   },
   buttonClose: {
     backgroundColor: "#ACE4AA",
+  },
+  closeModal: {
+    position: "absolute",
+    top: 5,
+    left: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 100,
+    justifyContent: "flex-start",
   },
   textStyle: {
     fontWeight: "medium",

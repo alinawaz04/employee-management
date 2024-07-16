@@ -26,8 +26,8 @@ const mockEmployees = [
     tasks: [
       {
         title: "Task 94",
-        startDate: "2024-07-15",
-        endDate: "2024-07-20",
+        startDate: "2024-07-10",
+        endDate: "2024-07-15",
         description: "Description of the task.",
       },
       {
