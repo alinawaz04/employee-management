@@ -28,9 +28,10 @@ const EmployeeListScreen = () => {
     return name.toLowerCase().includes(query.toLowerCase());
   });
 
-  // list of employees with incomplete tasks
+  // list of employees with incomplete and active tasks
   const incompleteTaskEmployees = filteredEmployees.filter((employee) => {
-    return employee.tasks.length > 0;
+    const activeTasks = employee.tasks.filter((task) => !task.completed);
+    return activeTasks.length > 0;
   });
 
   return (
