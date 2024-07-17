@@ -13,6 +13,7 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useEmployees } from "../context/EmployeeContext";
 import Task from "../components/Task";
+import RatingModal from "../components/RatingModal";
 
 const EmployeeDetailsScreen = ({ route }) => {
   const { id } = route.params;
@@ -28,7 +29,12 @@ const EmployeeDetailsScreen = ({ route }) => {
   const [taskDescription, setTaskDescription] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState(null);
+  const [ratingModalVisible, setRatingModalVisible] = useState(false);
+  const [rating, setRating] = useState(null);
+  const [completeTaskId, setCompleteTaskId] = useState(null);
 
+  // sync local state "tasks" with global state "employee.tasks"
+  // whenever "employee.tasks" changes.
   useEffect(() => {
     setTasks(employee.tasks);
   }, [employee.tasks]);
@@ -113,6 +119,18 @@ const EmployeeDetailsScreen = ({ route }) => {
     return date.toISOString().slice(0, 10);
   };
 
+  // handler function necessary for DatePicker component state management
+  const onStartDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setTaskStartDate(currentDate);
+  };
+
+  // handler function necessary for DatePicker component state management
+  const onEndDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setTaskEndDate(currentDate);
+  };
+
   // update task in screen state and global state
   const updateTask = (taskId, title, startDate, endDate, description) => {
     const formattedStart = formatDate(startDate);
@@ -134,20 +152,36 @@ const EmployeeDetailsScreen = ({ route }) => {
     updateEmployeeTasks(employee.id, newTasks);
   };
 
-  // handler function necessary for DatePicker component state management
-  const onStartDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setTaskStartDate(currentDate);
+  const openCompleteModal = (task) => {
+    setCompleteTaskId(task.id);
+    setRatingModalVisible(true);
   };
 
-  // handler function necessary for DatePicker component state management
-  const onEndDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setTaskEndDate(currentDate);
+  const completeTask = (taskId, taskRating) => {
+    const updatedTasks = tasks.map((task) =>
+      task.id === taskId
+        ? {
+            ...task,
+            completed: true,
+            rating: taskRating,
+          }
+        : task
+    );
+    setTasks(updatedTasks);
+    updateEmployeeTasks(employee.id, updatedTasks);
   };
 
   return (
     <ScrollView>
+      <RatingModal
+        ratingModalVisible={ratingModalVisible}
+        setRatingModalVisible={setRatingModalVisible}
+        setRating={(rating) => {
+          setRating(rating);
+          completeTask(completeTaskId, rating);
+          setRatingModalVisible(false);
+        }}
+      />
       <Modal
         animationType="slide"
         transparent={true}
@@ -222,17 +256,42 @@ const EmployeeDetailsScreen = ({ route }) => {
       </View>
 
       <View style={styles.taskContainer}>
+        <Text>Active Tasks: </Text>
         {tasks.map((task) => {
-          const overdue = checkDate(task.endDate);
-          return (
-            <Task task={task} overdue={overdue} editCallback={openEditModal} />
-          );
+          if (!task.completed) {
+            const overdue = checkDate(task.endDate);
+            return (
+              <Task
+                key={task.id}
+                task={task}
+                overdue={overdue}
+                editCallback={openEditModal}
+                completeCallback={openCompleteModal}
+              />
+            );
+          }
         })}
 
         <Button
           title="Add Custom Task"
           onPress={() => setModalVisible(!modalVisible)}
         />
+      </View>
+
+      <View style={styles.taskContainer}>
+        <Text>Complete Tasks: </Text>
+        {tasks.map((task) => {
+          if (task.completed) {
+            return (
+              <Task
+                key={task.id}
+                complete={true}
+                task={task}
+                editCallback={openEditModal}
+              />
+            );
+          }
+        })}
       </View>
     </ScrollView>
   );

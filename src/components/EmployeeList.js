@@ -13,11 +13,13 @@ const EmployeeList = ({ data }) => {
   const checkOverdueTasks = (tasks) => {
     let overdue;
     tasks.forEach((task) => {
-      const today = new Date();
-      const parsedDate = new Date(Date.parse(task.endDate));
-      // return true if date parsed is before today
-      if (parsedDate < today) {
-        overdue = true;
+      if (!task.completed) {
+        const today = new Date();
+        const parsedDate = new Date(Date.parse(task.endDate));
+        // return true if date parsed is before today
+        if (parsedDate < today) {
+          overdue = true;
+        }
       }
     });
     return overdue;
@@ -27,6 +29,7 @@ const EmployeeList = ({ data }) => {
     <View>
       {data.map((employee) => {
         const overdue = checkOverdueTasks(employee.tasks);
+        const activeTasks = employee.tasks.filter((task) => !task.completed);
         return (
           <TouchableOpacity
             key={employee.id}
@@ -47,10 +50,8 @@ const EmployeeList = ({ data }) => {
                 {employee.firstName} {employee.lastName}
               </Text>
               {/* if employee has 5 or more active tasks: add red text color */}
-              <Text
-                style={employee.tasks.length >= 5 ? styles.alertTasks : null}
-              >
-                Tasks: {employee.tasks.length}
+              <Text style={activeTasks.length >= 5 ? styles.alertTasks : null}>
+                Active Tasks: {activeTasks.length}
               </Text>
             </View>
           </TouchableOpacity>

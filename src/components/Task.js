@@ -1,9 +1,17 @@
 import React from "react";
 import { Text, View, StyleSheet, Pressable } from "react-native";
 
-const Task = ({ task, overdue, editCallback, completeCallback }) => {
+const Task = ({ task, overdue, complete, editCallback, completeCallback }) => {
   return (
-    <View key={task.id} style={overdue ? styles.overdueTask : styles.task}>
+    <View
+      style={
+        complete
+          ? [styles.completeTask, styles.task]
+          : overdue
+          ? [styles.overdueTask, styles.task]
+          : [styles.activeTask, styles.task]
+      }
+    >
       <View style={styles.taskInfo}>
         {overdue ? <Text style={styles.overdueText}>TASK OVERDUE</Text> : null}
         <Text>{task.title}</Text>
@@ -12,23 +20,32 @@ const Task = ({ task, overdue, editCallback, completeCallback }) => {
           {task.startDate} - {task.endDate}
         </Text>
       </View>
-      <View>
-        <Pressable style={styles.taskButton} onPress={() => editCallback(task)}>
-          <Text style={styles.taskButtonText}>Edit Task</Text>
-        </Pressable>
+      {complete ? (
+        <View>
+          <Text>Rating: {task.rating}/5</Text>
+        </View>
+      ) : (
+        <View>
+          <Pressable
+            style={styles.taskButton}
+            onPress={() => editCallback(task)}
+          >
+            <Text style={styles.taskButtonText}>Edit Task</Text>
+          </Pressable>
 
-        <Pressable style={styles.taskButton}>
-          <Text style={styles.taskButtonText}>Complete Task</Text>
-        </Pressable>
-      </View>
+          <Pressable
+            style={styles.taskButton}
+            onPress={() => completeCallback(task)}
+          >
+            <Text style={styles.taskButtonText}>Complete Task</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  taskInfo: {
-    marginBottom: 10,
-  },
   taskContainer: {
     marginBottom: 50,
   },
@@ -45,20 +62,22 @@ const styles = StyleSheet.create({
     color: "black",
   },
   task: {
-    borderColor: "green",
-    borderWidth: 2,
     marginVertical: 5,
     padding: 5,
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  completeTask: {
+    borderColor: "green",
+    borderWidth: 2,
+  },
+  activeTask: {
+    borderColor: "black",
+    borderWidth: 2,
+  },
   overdueTask: {
     borderColor: "red",
     borderWidth: 2,
-    marginVertical: 5,
-    padding: 5,
-    flexDirection: "row",
-    justifyContent: "space-between",
   },
   overdueText: {
     color: "red",
