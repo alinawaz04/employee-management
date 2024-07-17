@@ -15,7 +15,7 @@
   - ~~Task should have a title, start/end date, description~~
   - ~~Show the tasks in a list and incomplete and outdated tasks should be marked in some way~~
   - ~~Existing tasks should be editable~~
-  - Tasks should be able to be marked as complete and rated on a scale of 1-5 once marked as complete
+  - ~~Tasks should be able to be marked as complete and rated on a scale of 1-5 once marked as complete~~
     - ~~On the employee list page, the manager should see an indicator if there is a task that is passed the due date for an employee on the list~~
 
 ## All app data should be stored in local storage
