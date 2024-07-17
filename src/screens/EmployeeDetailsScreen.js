@@ -8,6 +8,7 @@ import {
   Pressable,
   TextInput,
   Alert,
+  ScrollView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useEmployees } from "../context/EmployeeContext";
@@ -24,10 +25,64 @@ const EmployeeDetailsScreen = ({ route }) => {
   const [taskStartDate, setTaskStartDate] = useState(new Date());
   const [taskEndDate, setTaskEndDate] = useState(new Date());
   const [taskDescription, setTaskDescription] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState(null);
 
   useEffect(() => {
     setTasks(employee.tasks);
   }, [employee.tasks]);
+
+  const openEditModal = (task) => {
+    setIsEditing(true);
+    setEditingTaskId(task.id);
+    setTaskTitle(task.title);
+    setTaskStartDate(new Date(task.startDate));
+    setTaskEndDate(new Date(task.endDate));
+    setTaskDescription(task.description);
+    setModalVisible(true);
+  };
+
+  const addTask = (title, startDate, endDate, description) => {
+    const formattedStart = formatDate(startDate);
+    const formattedEnd = formatDate(endDate);
+    const newTasks = [
+      ...tasks,
+      {
+        id: String(new Date().getTime()),
+        title,
+        description,
+        startDate: formattedStart,
+        endDate: formattedEnd,
+      },
+    ];
+    setTasks(newTasks);
+    updateEmployeeTasks(employee.id, newTasks);
+  };
+
+  const handleSaveTask = () => {
+    if (taskTitle && taskStartDate && taskEndDate && taskDescription) {
+      if (isEditing) {
+        updateTask(
+          editingTaskId,
+          taskTitle,
+          taskStartDate,
+          taskEndDate,
+          taskDescription
+        );
+      } else {
+        addTask(taskTitle, taskStartDate, taskEndDate, taskDescription);
+      }
+      setModalVisible(false);
+      setIsEditing(false);
+      setEditingTaskId(null);
+      setTaskTitle("");
+      setTaskStartDate(new Date());
+      setTaskEndDate(new Date());
+      setTaskDescription("");
+    } else {
+      Alert.alert("All fields must be filled!");
+    }
+  };
 
   // helper function to check if end date of task is past today
   const checkDate = (date) => {
@@ -41,20 +96,22 @@ const EmployeeDetailsScreen = ({ route }) => {
     return date.toISOString().slice(0, 10);
   };
 
-  const addTask = (title, startDate, endDate, description) => {
+  const updateTask = (taskId, title, startDate, endDate, description) => {
     const formattedStart = formatDate(startDate);
     const formattedEnd = formatDate(endDate);
-    const newTasks = [
-      ...tasks,
-      {
-        title,
-        description,
-        startDate: formattedStart,
-        endDate: formattedEnd,
-      },
-    ];
+    const newTasks = tasks.map((task) =>
+      task.id === taskId
+        ? {
+            ...task,
+            title,
+            description,
+            startDate: formattedStart,
+            endDate: formattedEnd,
+          }
+        : task
+    );
     setTasks(newTasks);
-    updateEmployeeTasks(employee.id, newTasks); // Update tasks in parent component
+    updateEmployeeTasks(employee.id, newTasks); // Update tasks in context
   };
 
   const onStartDateChange = (event, selectedDate) => {
@@ -68,7 +125,7 @@ const EmployeeDetailsScreen = ({ route }) => {
   };
 
   return (
-    <View>
+    <ScrollView>
       <Modal
         animationType="slide"
         transparent={true}
@@ -81,11 +138,23 @@ const EmployeeDetailsScreen = ({ route }) => {
           <View style={styles.modalView}>
             <Pressable
               style={[styles.closeModal, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}
+              onPress={() => {
+                setModalVisible(false);
+                setIsEditing(false);
+                setEditingTaskId(null);
+                setTaskTitle("");
+                setTaskStartDate(new Date());
+                setTaskEndDate(new Date());
+                setTaskDescription("");
+              }}
             >
               <Text style={styles.textStyle}>X</Text>
             </Pressable>
-            <Text style={styles.modalHeaderText}>Add Employee</Text>
+            {isEditing ? (
+              <Text style={styles.modalHeaderText}>Edit Task</Text>
+            ) : (
+              <Text style={styles.modalHeaderText}>Add Task</Text>
+            )}
 
             <Text>Task title::</Text>
             <TextInput
@@ -121,24 +190,7 @@ const EmployeeDetailsScreen = ({ route }) => {
 
             <Pressable
               style={[styles.button, styles.buttonClose]}
-              onPress={() => {
-                if (
-                  taskTitle &&
-                  taskStartDate &&
-                  taskEndDate &&
-                  taskDescription
-                ) {
-                  addTask(
-                    taskTitle,
-                    taskStartDate,
-                    taskEndDate,
-                    taskDescription
-                  );
-                  setModalVisible(!modalVisible);
-                } else {
-                  Alert.alert("All field must be filled!");
-                }
-              }}
+              onPress={handleSaveTask}
             >
               <Text style={styles.textStyle}>Submit</Text>
             </Pressable>
@@ -151,34 +203,67 @@ const EmployeeDetailsScreen = ({ route }) => {
         </Text>
         <Text style={styles.headerText}>Employee Email: {employee.email} </Text>
       </View>
+      <View style={styles.taskContainer}>
+        {tasks.map((task) => {
+          const overdue = checkDate(task.endDate);
+          return (
+            <View
+              key={task.id}
+              style={overdue ? styles.overdueTask : styles.task}
+            >
+              <View style={styles.taskInfo}>
+                {overdue ? (
+                  <Text style={styles.overdueText}>TASK OVERDUE</Text>
+                ) : null}
+                <Text>{task.title}</Text>
+                <Text>{task.description}</Text>
+                <Text>
+                  {task.startDate} - {task.endDate}
+                </Text>
+              </View>
+              <View>
+                <Pressable
+                  style={styles.taskButton}
+                  onPress={() => openEditModal(task)}
+                >
+                  <Text style={styles.taskButtonText}>Edit Task</Text>
+                </Pressable>
 
-      {tasks.map((task) => {
-        const overdue = checkDate(task.endDate);
-        return (
-          <View
-            key={task.title}
-            style={overdue ? styles.overdueTask : styles.task}
-          >
-            {overdue ? (
-              <Text style={styles.overdueText}>TASK OVERDUE</Text>
-            ) : null}
-            <Text>{task.title}</Text>
-            <Text>{task.description}</Text>
-            <Text>
-              {task.startDate} - {task.endDate}
-            </Text>
-          </View>
-        );
-      })}
-      <Button
-        title="Add Custom Task"
-        onPress={() => setModalVisible(!modalVisible)}
-      />
-    </View>
+                <Pressable style={styles.taskButton}>
+                  <Text style={styles.taskButtonText}>Complete Task</Text>
+                </Pressable>
+              </View>
+            </View>
+          );
+        })}
+        <Button
+          title="Add Custom Task"
+          onPress={() => setModalVisible(!modalVisible)}
+        />
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  taskInfo: {
+    marginBottom: 10,
+  },
+  taskContainer: {
+    marginBottom: 50,
+  },
+  taskButton: {
+    padding: 10,
+    borderColor: "black",
+    borderWidth: 1,
+    borderRadius: 10,
+    width: 125,
+    margin: 10,
+    alignItems: "center",
+  },
+  taskButtonText: {
+    color: "black",
+  },
   employeeInfo: {
     alignItems: "center",
     padding: 10,
@@ -191,12 +276,16 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     marginVertical: 5,
     padding: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   overdueTask: {
     borderColor: "red",
     borderWidth: 2,
     marginVertical: 5,
     padding: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   overdueText: {
     color: "red",
