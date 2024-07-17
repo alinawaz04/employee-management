@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useEmployees } from "../context/EmployeeContext";
+import Task from "../components/Task";
 
 const EmployeeDetailsScreen = ({ route }) => {
   const { id } = route.params;
@@ -32,6 +33,17 @@ const EmployeeDetailsScreen = ({ route }) => {
     setTasks(employee.tasks);
   }, [employee.tasks]);
 
+  const resetModalState = () => {
+    setModalVisible(false);
+    setIsEditing(false);
+    setEditingTaskId(null);
+    setTaskTitle("");
+    setTaskStartDate(new Date());
+    setTaskEndDate(new Date());
+    setTaskDescription("");
+  };
+
+  // pre-fill modal  with task data
   const openEditModal = (task) => {
     setIsEditing(true);
     setEditingTaskId(task.id);
@@ -42,6 +54,7 @@ const EmployeeDetailsScreen = ({ route }) => {
     setModalVisible(true);
   };
 
+  // add data from modal to tasks state and global state in context
   const addTask = (title, startDate, endDate, description) => {
     const formattedStart = formatDate(startDate);
     const formattedEnd = formatDate(endDate);
@@ -55,12 +68,19 @@ const EmployeeDetailsScreen = ({ route }) => {
         endDate: formattedEnd,
       },
     ];
+
+    // set screen state
     setTasks(newTasks);
+
+    // set global state
     updateEmployeeTasks(employee.id, newTasks);
   };
 
+  // handle different scenarios of saving a task
   const handleSaveTask = () => {
+    // verify all fields are filled
     if (taskTitle && taskStartDate && taskEndDate && taskDescription) {
+      // check if we are currently in editing task state
       if (isEditing) {
         updateTask(
           editingTaskId,
@@ -70,15 +90,11 @@ const EmployeeDetailsScreen = ({ route }) => {
           taskDescription
         );
       } else {
+        // not in editing task state, so add task
         addTask(taskTitle, taskStartDate, taskEndDate, taskDescription);
       }
-      setModalVisible(false);
-      setIsEditing(false);
-      setEditingTaskId(null);
-      setTaskTitle("");
-      setTaskStartDate(new Date());
-      setTaskEndDate(new Date());
-      setTaskDescription("");
+      // resetting modal state
+      resetModalState();
     } else {
       Alert.alert("All fields must be filled!");
     }
@@ -92,10 +108,12 @@ const EmployeeDetailsScreen = ({ route }) => {
     return parsedDate < today;
   };
 
+  // helper to format date to match global data
   const formatDate = (date) => {
     return date.toISOString().slice(0, 10);
   };
 
+  // update task in screen state and global state
   const updateTask = (taskId, title, startDate, endDate, description) => {
     const formattedStart = formatDate(startDate);
     const formattedEnd = formatDate(endDate);
@@ -110,15 +128,19 @@ const EmployeeDetailsScreen = ({ route }) => {
           }
         : task
     );
+    // update screen tasks state
     setTasks(newTasks);
-    updateEmployeeTasks(employee.id, newTasks); // Update tasks in context
+    // update global tasks state in context
+    updateEmployeeTasks(employee.id, newTasks);
   };
 
+  // handler function necessary for DatePicker component state management
   const onStartDateChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setTaskStartDate(currentDate);
   };
 
+  // handler function necessary for DatePicker component state management
   const onEndDateChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setTaskEndDate(currentDate);
@@ -139,13 +161,7 @@ const EmployeeDetailsScreen = ({ route }) => {
             <Pressable
               style={[styles.closeModal, styles.buttonClose]}
               onPress={() => {
-                setModalVisible(false);
-                setIsEditing(false);
-                setEditingTaskId(null);
-                setTaskTitle("");
-                setTaskStartDate(new Date());
-                setTaskEndDate(new Date());
-                setTaskDescription("");
+                resetModalState();
               }}
             >
               <Text style={styles.textStyle}>X</Text>
@@ -197,45 +213,22 @@ const EmployeeDetailsScreen = ({ route }) => {
           </View>
         </View>
       </Modal>
+
       <View style={styles.employeeInfo}>
         <Text style={styles.headerText}>
           Employee: {employee.firstName} {employee.lastName}
         </Text>
         <Text style={styles.headerText}>Employee Email: {employee.email} </Text>
       </View>
+
       <View style={styles.taskContainer}>
         {tasks.map((task) => {
           const overdue = checkDate(task.endDate);
           return (
-            <View
-              key={task.id}
-              style={overdue ? styles.overdueTask : styles.task}
-            >
-              <View style={styles.taskInfo}>
-                {overdue ? (
-                  <Text style={styles.overdueText}>TASK OVERDUE</Text>
-                ) : null}
-                <Text>{task.title}</Text>
-                <Text>{task.description}</Text>
-                <Text>
-                  {task.startDate} - {task.endDate}
-                </Text>
-              </View>
-              <View>
-                <Pressable
-                  style={styles.taskButton}
-                  onPress={() => openEditModal(task)}
-                >
-                  <Text style={styles.taskButtonText}>Edit Task</Text>
-                </Pressable>
-
-                <Pressable style={styles.taskButton}>
-                  <Text style={styles.taskButtonText}>Complete Task</Text>
-                </Pressable>
-              </View>
-            </View>
+            <Task task={task} overdue={overdue} editCallback={openEditModal} />
           );
         })}
+
         <Button
           title="Add Custom Task"
           onPress={() => setModalVisible(!modalVisible)}
@@ -246,51 +239,12 @@ const EmployeeDetailsScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  taskInfo: {
-    marginBottom: 10,
-  },
-  taskContainer: {
-    marginBottom: 50,
-  },
-  taskButton: {
-    padding: 10,
-    borderColor: "black",
-    borderWidth: 1,
-    borderRadius: 10,
-    width: 125,
-    margin: 10,
-    alignItems: "center",
-  },
-  taskButtonText: {
-    color: "black",
-  },
   employeeInfo: {
     alignItems: "center",
     padding: 10,
   },
   headerText: {
     fontSize: 16,
-  },
-  task: {
-    borderColor: "green",
-    borderWidth: 2,
-    marginVertical: 5,
-    padding: 5,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  overdueTask: {
-    borderColor: "red",
-    borderWidth: 2,
-    marginVertical: 5,
-    padding: 5,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  overdueText: {
-    color: "red",
-    fontSize: 16,
-    fontWeight: "bold",
   },
   centeredView: {
     flex: 1,
@@ -314,7 +268,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-
   modalInput: {
     padding: 10,
     marginTop: 5,
