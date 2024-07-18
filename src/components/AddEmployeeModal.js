@@ -31,7 +31,7 @@ const AddEmployeeModal = ({ modalVisible, setModalVisible, addEmployee }) => {
             style={[styles.closeModal, styles.buttonClose]}
             onPress={() => setModalVisible(!modalVisible)}
           >
-            <Text style={styles.textStyle}>X</Text>
+            <Text style={styles.textStyle}>x</Text>
           </Pressable>
           <Text style={styles.modalHeaderText}>Add Employee</Text>
 
@@ -87,9 +87,8 @@ const styles = StyleSheet.create({
   },
   modalView: {
     marginB: 20,
-    backgroundColor: "white",
+    backgroundColor: "#FFFAFA",
     borderRadius: 20,
-
     paddingHorizontal: 35,
     alignItems: "center",
     shadowColor: "#000",
@@ -106,12 +105,13 @@ const styles = StyleSheet.create({
     padding: 10,
     marginTop: 5,
     marginBottom: 10,
+    borderRadius: 5,
     width: 200,
     borderColor: "black",
     borderWidth: 1,
   },
   button: {
-    borderRadius: 20,
+    borderRadius: 10,
     padding: 10,
     elevation: 2,
     marginBottom: 10,
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F194FF",
   },
   buttonClose: {
-    backgroundColor: "#ACE4AA",
+    backgroundColor: "#B9C6AE",
   },
   closeModal: {
     position: "absolute",
@@ -129,7 +129,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 100,
-    justifyContent: "flex-start",
+    justifyContent: "center",
+    alignItems: "center",
   },
   textStyle: {
     fontWeight: "medium",

@@ -16,12 +16,29 @@ export default function App() {
           <Stack.Screen
             name="EmployeeList"
             component={EmployeeListScreen}
-            options={{ title: "Employee List" }}
+            options={{
+              title: "Employee List",
+              headerStyle: {
+                backgroundColor: "#232323",
+              },
+              headerTitleStyle: {
+                color: "#FFFAFA",
+              },
+            }}
           />
           <Stack.Screen
             name="EmployeeDetails"
             component={EmployeeDetailsScreen}
-            options={{ title: "Employee Details" }}
+            options={{
+              title: "Employee Details",
+              headerStyle: {
+                backgroundColor: "#232323",
+              },
+              headerTitleStyle: {
+                color: "#FFFAFA",
+              },
+              headerBackTitleVisible: false,
+            }}
           />
         </Stack.Navigator>
       </NavigationContainer>

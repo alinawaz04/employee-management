@@ -253,8 +253,7 @@ export const EmployeeProvider = ({ children }) => {
     const loadEmployees = async () => {
       try {
         const json = await AsyncStorage.getItem("employees");
-        const data = json != null ? JSON.parse(json) : null;
-        console.log(data);
+        const data = json != null ? JSON.parse(json) : [];
         setEmployees(data);
       } catch (err) {
         console.error("Error loading data from local storage", err);

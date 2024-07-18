@@ -46,11 +46,15 @@ const EmployeeList = ({ data }) => {
                   : styles.employee
               }
             >
-              <Text>
+              <Text style={styles.textStyle}>
                 {employee.firstName} {employee.lastName}
               </Text>
               {/* if employee has 5 or more active tasks: add red text color */}
-              <Text style={activeTasks.length >= 5 ? styles.alertTasks : null}>
+              <Text
+                style={
+                  activeTasks.length >= 5 ? styles.alertTasks : styles.textStyle
+                }
+              >
                 Active Tasks: {activeTasks.length}
               </Text>
             </View>
@@ -62,13 +66,17 @@ const EmployeeList = ({ data }) => {
 };
 
 const styles = StyleSheet.create({
+  textStyle: {
+    color: "#FFFAFA",
+  },
   employee: {
-    borderColor: "black",
+    borderColor: "#B9C6AE",
     borderWidth: 2,
+    borderRadius: 10,
     flexDirection: "row",
     margin: 5,
     marginHorizontal: 20,
-    padding: 5,
+    padding: 15,
     justifyContent: "space-between",
   },
 

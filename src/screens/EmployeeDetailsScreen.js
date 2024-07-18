@@ -4,11 +4,11 @@ import {
   View,
   StyleSheet,
   Modal,
-  Button,
   Pressable,
   TextInput,
   Alert,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import { useEmployees } from "../context/EmployeeContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -58,6 +58,11 @@ const EmployeeDetailsScreen = ({ route }) => {
     setTaskEndDate(new Date(task.endDate));
     setTaskDescription(task.description);
     setModalVisible(true);
+  };
+
+  // helper to format date to match global data
+  const formatDate = (date) => {
+    return date.toISOString().slice(0, 10);
   };
 
   // add data from modal to tasks state and global state in context
@@ -114,11 +119,6 @@ const EmployeeDetailsScreen = ({ route }) => {
     return parsedDate < today;
   };
 
-  // helper to format date to match global data
-  const formatDate = (date) => {
-    return date.toISOString().slice(0, 10);
-  };
-
   // handler function necessary for DatePicker component state management
   const onStartDateChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -172,7 +172,7 @@ const EmployeeDetailsScreen = ({ route }) => {
   };
 
   return (
-    <ScrollView>
+    <ScrollView style={styles.container}>
       <RatingModal
         ratingModalVisible={ratingModalVisible}
         setRatingModalVisible={setRatingModalVisible}
@@ -198,7 +198,7 @@ const EmployeeDetailsScreen = ({ route }) => {
                 resetModalState();
               }}
             >
-              <Text style={styles.textStyle}>X</Text>
+              <Text style={styles.modalTextStyle}>x</Text>
             </Pressable>
             {isEditing ? (
               <Text style={styles.modalHeaderText}>Edit Task</Text>
@@ -206,10 +206,9 @@ const EmployeeDetailsScreen = ({ route }) => {
               <Text style={styles.modalHeaderText}>Add Task</Text>
             )}
 
-            <Text>Task title::</Text>
+            <Text>Task title:</Text>
             <TextInput
               style={styles.modalInput}
-              placeholder="Task title"
               value={taskTitle}
               onChangeText={setTaskTitle}
             />
@@ -220,6 +219,7 @@ const EmployeeDetailsScreen = ({ route }) => {
               display="default"
               value={taskStartDate}
               onChange={onStartDateChange}
+              style={{ marginBottom: 10 }}
             />
 
             <Text>Task end date:</Text>
@@ -228,21 +228,21 @@ const EmployeeDetailsScreen = ({ route }) => {
               display="default"
               value={taskEndDate}
               onChange={onEndDateChange}
+              style={{ marginBottom: 10 }}
             />
 
             <Text>Task description:</Text>
             <TextInput
               style={styles.modalInput}
-              placeholder="Task description"
               value={taskDescription}
               onChangeText={setTaskDescription}
             />
 
             <Pressable
-              style={[styles.button, styles.buttonClose]}
+              style={[styles.modalButton, styles.buttonClose]}
               onPress={handleSaveTask}
             >
-              <Text style={styles.textStyle}>Submit</Text>
+              <Text style={styles.modalTextStyle}>Submit</Text>
             </Pressable>
           </View>
         </View>
@@ -250,13 +250,16 @@ const EmployeeDetailsScreen = ({ route }) => {
 
       <View style={styles.employeeInfo}>
         <Text style={styles.headerText}>
-          Employee: {employee.firstName} {employee.lastName}
+          <Text style={styles.bold}> Employee:</Text> {employee.firstName}{" "}
+          {employee.lastName}
         </Text>
-        <Text style={styles.headerText}>Employee Email: {employee.email} </Text>
+        <Text style={styles.headerText}>
+          <Text style={styles.bold}>Employee Email:</Text> {employee.email}{" "}
+        </Text>
       </View>
 
       <View style={styles.taskContainer}>
-        <Text>Active Tasks: </Text>
+        <Text style={styles.labelTextStyle}>Active Tasks: </Text>
         {tasks.map((task) => {
           if (!task.completed) {
             const overdue = checkDate(task.endDate);
@@ -272,14 +275,18 @@ const EmployeeDetailsScreen = ({ route }) => {
           }
         })}
 
-        <Button
-          title="Add Custom Task"
-          onPress={() => setModalVisible(!modalVisible)}
-        />
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setModalVisible(!modalVisible)}
+          >
+            <Text>Add Custom Task</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.taskContainer}>
-        <Text>Complete Tasks: </Text>
+        <Text style={styles.labelTextStyle}>Complete Tasks: </Text>
         {tasks.map((task) => {
           if (task.completed) {
             return (
@@ -298,12 +305,43 @@ const EmployeeDetailsScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#232323",
+    flex: 1,
+  },
+  textStyle: {
+    color: "#FFFAFA",
+  },
+  bold: {
+    fontWeight: "bold",
+    color: "#B9C6AE",
+  },
+  labelTextStyle: {
+    fontWeight: "bold",
+    fontSize: 14,
+    color: "#FFFAFA",
+  },
+  buttonContainer: {
+    flex: 1,
+    alignItems: "center",
+  },
+  button: {
+    backgroundColor: "#FFFAFA",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+    marginVertical: 15,
+    width: "auto",
+    alignItems: "center",
+  },
   employeeInfo: {
     alignItems: "center",
     padding: 10,
+    borderRadius: 15,
   },
   headerText: {
     fontSize: 16,
+    color: "#FFFAFA",
   },
   centeredView: {
     flex: 1,
@@ -331,11 +369,12 @@ const styles = StyleSheet.create({
     padding: 10,
     marginTop: 5,
     marginBottom: 10,
+    borderRadius: 5,
     width: 200,
     borderColor: "black",
     borderWidth: 1,
   },
-  button: {
+  modalButton: {
     borderRadius: 20,
     padding: 10,
     elevation: 2,
@@ -345,7 +384,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F194FF",
   },
   buttonClose: {
-    backgroundColor: "#ACE4AA",
+    backgroundColor: "#B9C6AE",
   },
   closeModal: {
     position: "absolute",
@@ -354,9 +393,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 100,
-    justifyContent: "flex-start",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  textStyle: {
+  modalTextStyle: {
     fontWeight: "medium",
     textAlign: "center",
   },
