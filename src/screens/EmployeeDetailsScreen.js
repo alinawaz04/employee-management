@@ -14,6 +14,7 @@ import { useEmployees } from "../context/EmployeeContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Task from "../components/Task";
 import RatingModal from "../components/RatingModal";
+import TaskList from "../components/TaskList";
 
 const EmployeeDetailsScreen = ({ route }) => {
   const { id } = route.params;
@@ -109,14 +110,6 @@ const EmployeeDetailsScreen = ({ route }) => {
     } else {
       Alert.alert("All fields must be filled!");
     }
-  };
-
-  // helper function to check if end date of task is past today
-  const checkDate = (date) => {
-    const today = new Date();
-    const parsedDate = new Date(Date.parse(date));
-    // return true if date passed is before today
-    return parsedDate < today;
   };
 
   // handler function necessary for DatePicker component state management
@@ -258,34 +251,23 @@ const EmployeeDetailsScreen = ({ route }) => {
         </Text>
       </View>
 
-      <View style={styles.taskContainer}>
-        <Text style={styles.labelTextStyle}>Active Tasks: </Text>
-        {tasks.map((task) => {
-          if (!task.completed) {
-            const overdue = checkDate(task.endDate);
-            return (
-              <Task
-                key={task.id}
-                task={task}
-                overdue={overdue}
-                editCallback={openEditModal}
-                completeCallback={openCompleteModal}
-              />
-            );
-          }
-        })}
+      <TaskList
+        tasks={tasks}
+        type={"Active"}
+        editCallback={openEditModal}
+        completeCallback={openCompleteModal}
+      />
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => setModalVisible(!modalVisible)}
-          >
-            <Text>Add Custom Task</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setModalVisible(!modalVisible)}
+        >
+          <Text>Add Custom Task</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.taskContainer}>
+      {/* <View>
         <Text style={styles.labelTextStyle}>Complete Tasks: </Text>
         {tasks.map((task) => {
           if (task.completed) {
@@ -299,7 +281,8 @@ const EmployeeDetailsScreen = ({ route }) => {
             );
           }
         })}
-      </View>
+      </View> */}
+      <TaskList tasks={tasks} type={"Completed"} />
     </ScrollView>
   );
 };
