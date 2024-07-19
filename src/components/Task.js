@@ -4,6 +4,7 @@ import { Text, View, StyleSheet, Pressable } from "react-native";
 const Task = ({ task, overdue, complete, editCallback, completeCallback }) => {
   return (
     <View
+      // apply different styles based on task status (completed, overdue, active)
       style={
         complete
           ? [styles.completeTask, styles.task]
@@ -13,13 +14,17 @@ const Task = ({ task, overdue, complete, editCallback, completeCallback }) => {
       }
     >
       <View style={styles.taskInfo}>
+        {/* display if task is overdue */}
         {overdue ? <Text style={styles.overdueText}>TASK OVERDUE</Text> : null}
+
         <Text style={styles.textStyle}>{task.title}</Text>
         <Text style={styles.textStyle}>{task.description}</Text>
         <Text style={styles.textStyle}>
           {task.startDate} - {task.endDate}
         </Text>
       </View>
+
+      {/* display task rating if it is completed */}
       {complete ? (
         <View>
           <Text style={styles.textStyle}>Rating: {task.rating}/5</Text>

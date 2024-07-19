@@ -12,27 +12,37 @@ import {
 } from "react-native";
 import { useEmployees } from "../context/EmployeeContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Task from "../components/Task";
 import RatingModal from "../components/RatingModal";
 import TaskList from "../components/TaskList";
 
 const EmployeeDetailsScreen = ({ route }) => {
-  const { id } = route.params;
-  const { employees, updateEmployeeTasks } = useEmployees();
+  const { id } = route.params; // get employee id from route params
+  const { employees, updateEmployeeTasks } = useEmployees(); // use employee context to receive employees and ability to update employee tasks
 
-  const employee = employees.find((emp) => emp.id === id);
+  const employee = employees.find((emp) => emp.id === id); // find employee by id
 
+  // local state for tasks
   const [tasks, setTasks] = useState(employee.tasks);
+
+  // state for modal visibility
   const [modalVisible, setModalVisible] = useState(false);
+
+  // state for modal inputs
   const [taskTitle, setTaskTitle] = useState("");
   const [taskStartDate, setTaskStartDate] = useState(new Date());
   const [taskEndDate, setTaskEndDate] = useState(new Date());
   const [taskDescription, setTaskDescription] = useState("");
+
+  // state for editing task
   const [isEditing, setIsEditing] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState(null);
+
+  // state fro completing task
+  const [completeTaskId, setCompleteTaskId] = useState(null);
+
+  // state for rating modal
   const [ratingModalVisible, setRatingModalVisible] = useState(false);
   const [rating, setRating] = useState(null);
-  const [completeTaskId, setCompleteTaskId] = useState(null);
 
   // sync local state "tasks" with global state "employee.tasks"
   // whenever "employee.tasks" changes.
@@ -40,6 +50,7 @@ const EmployeeDetailsScreen = ({ route }) => {
     setTasks(employee.tasks);
   }, [employee.tasks]);
 
+  // function to reset modal state to defaults
   const resetModalState = () => {
     setModalVisible(false);
     setIsEditing(false);
@@ -50,7 +61,7 @@ const EmployeeDetailsScreen = ({ route }) => {
     setTaskDescription("");
   };
 
-  // pre-fill modal  with task data
+  // function to pre-fill modal with task data
   const openEditModal = (task) => {
     setIsEditing(true);
     setEditingTaskId(task.id);
@@ -61,12 +72,12 @@ const EmployeeDetailsScreen = ({ route }) => {
     setModalVisible(true);
   };
 
-  // helper to format date to match global data
+  // function to format date to match global data
   const formatDate = (date) => {
     return date.toISOString().slice(0, 10);
   };
 
-  // add data from modal to tasks state and global state in context
+  // function to add data from modal to tasks state and global state in context
   const addTask = (title, startDate, endDate, description) => {
     const formattedStart = formatDate(startDate);
     const formattedEnd = formatDate(endDate);
@@ -112,13 +123,13 @@ const EmployeeDetailsScreen = ({ route }) => {
     }
   };
 
-  // handler function necessary for DatePicker component state management
+  // handler function for DatePicker component
   const onStartDateChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setTaskStartDate(currentDate);
   };
 
-  // handler function necessary for DatePicker component state management
+  // handler function for DatePicker component
   const onEndDateChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setTaskEndDate(currentDate);
@@ -145,11 +156,13 @@ const EmployeeDetailsScreen = ({ route }) => {
     updateEmployeeTasks(employee.id, newTasks);
   };
 
+  // function to open completion modal for a task
   const openCompleteModal = (task) => {
     setCompleteTaskId(task.id);
     setRatingModalVisible(true);
   };
 
+  // function to mark task as completed in global state with rating
   const completeTask = (taskId, taskRating) => {
     const updatedTasks = tasks.map((task) =>
       task.id === taskId
@@ -169,6 +182,7 @@ const EmployeeDetailsScreen = ({ route }) => {
       <RatingModal
         ratingModalVisible={ratingModalVisible}
         setRatingModalVisible={setRatingModalVisible}
+        // receive rating from component and use to set local state and complete task
         setRating={(rating) => {
           setRating(rating);
           completeTask(completeTaskId, rating);
@@ -267,21 +281,6 @@ const EmployeeDetailsScreen = ({ route }) => {
         </TouchableOpacity>
       </View>
 
-      {/* <View>
-        <Text style={styles.labelTextStyle}>Complete Tasks: </Text>
-        {tasks.map((task) => {
-          if (task.completed) {
-            return (
-              <Task
-                key={task.id}
-                complete={true}
-                task={task}
-                editCallback={openEditModal}
-              />
-            );
-          }
-        })}
-      </View> */}
       <TaskList tasks={tasks} type={"Completed"} />
     </ScrollView>
   );

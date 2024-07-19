@@ -10,11 +10,29 @@ import {
 } from "react-native";
 import { useEmployees } from "../context/EmployeeContext";
 
-const AddEmployeeModal = ({ modalVisible, setModalVisible, addEmployee }) => {
+const AddEmployeeModal = ({ modalVisible, setModalVisible }) => {
+  // local state for input fields
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+
+  // accessing the updateEmployees function from context
   const { updateEmployees } = useEmployees();
+
+  // function to handle form submission
+  const handleAddEmployee = () => {
+    if (firstName && lastName && email) {
+      // add employee using the context function
+      updateEmployees(firstName, lastName, email);
+      // close the modal
+      setModalVisible(!modalVisible);
+    } else {
+      // show an alert if any field is missing
+      Alert.alert(
+        "Must provide first name, last name, and email to add employee"
+      );
+    }
+  };
 
   return (
     <Modal
@@ -38,37 +56,25 @@ const AddEmployeeModal = ({ modalVisible, setModalVisible, addEmployee }) => {
           <Text>Employee first name:</Text>
           <TextInput
             style={styles.modalInput}
-            placeholder="First name"
             value={firstName}
             onChangeText={setFirstName}
           />
           <Text>Employee last name:</Text>
           <TextInput
             style={styles.modalInput}
-            placeholder="Last name"
             value={lastName}
             onChangeText={setLastName}
           />
           <Text>Employee email:</Text>
           <TextInput
             style={styles.modalInput}
-            placeholder="Email"
             value={email}
             onChangeText={setEmail}
           />
 
           <Pressable
             style={[styles.button, styles.buttonClose]}
-            onPress={() => {
-              if (firstName && lastName && email) {
-                updateEmployees(firstName, lastName, email);
-                setModalVisible(!modalVisible);
-              } else {
-                Alert.alert(
-                  "Must provide first name, last name, and email to add employee"
-                );
-              }
-            }}
+            onPress={handleAddEmployee}
           >
             <Text style={styles.textStyle}>Submit</Text>
           </Pressable>
@@ -86,7 +92,7 @@ const styles = StyleSheet.create({
     marginTop: 22,
   },
   modalView: {
-    marginB: 20,
+    margin: 20,
     backgroundColor: "#FFFAFA",
     borderRadius: 20,
     paddingHorizontal: 35,
@@ -100,7 +106,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-
   modalInput: {
     padding: 10,
     marginTop: 5,

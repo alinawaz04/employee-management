@@ -1,20 +1,22 @@
 import React from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
-/**
- * Render list of employees
- * @param data - list of employees to be rendered
- */
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const EmployeeList = ({ data }) => {
+  // gain access to navigation from within component
   const navigation = useNavigation();
 
+  // AsyncStorage.clear();
+
+  // function to check id an employee has incomplete and overdue tasks
   const checkOverdueTasks = (tasks) => {
     let overdue;
     tasks.forEach((task) => {
+      // check incomplete tasks only
       if (!task.completed) {
         const today = new Date();
+        // parse end date of task to be in same format as "today"
         const parsedDate = new Date(Date.parse(task.endDate));
         // return true if date parsed is before today
         if (parsedDate < today) {
@@ -34,6 +36,7 @@ const EmployeeList = ({ data }) => {
           <TouchableOpacity
             key={employee.id}
             onPress={() =>
+              // navigate to EmployeeDetails screen and pass employee id as param
               navigation.navigate("EmployeeDetails", {
                 id: employee.id,
               })

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet, Modal, Pressable } from "react-native";
+import { Text, View, StyleSheet, Modal } from "react-native";
 import { Rating } from "react-native-ratings";
 
 const RatingModal = ({

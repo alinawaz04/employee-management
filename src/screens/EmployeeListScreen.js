@@ -5,8 +5,6 @@ import {
   StyleSheet,
   Switch,
   TextInput,
-  Button,
-  Pressable,
   TouchableOpacity,
 } from "react-native";
 
@@ -15,9 +13,16 @@ import AddEmployeeModal from "../components/AddEmployeeModal";
 import { useEmployees } from "../context/EmployeeContext";
 
 const EmployeeListScreen = () => {
+  // get employees from global state
   const { employees } = useEmployees();
+
+  // search input state
   const [query, setQuery] = useState("");
+
+  // state for modal
   const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
+
+  // state for showing incomplete tasks only switch
   const [showIncompleteOnly, setShowIncompleteOnly] = useState(false);
 
   const toggleSwitch = () => {
