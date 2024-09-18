@@ -2,13 +2,15 @@ import EmployeeDetailsScreen from "./src/screens/EmployeeDetailsScreen";
 import EmployeeListScreen from "./src/screens/EmployeeListScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { EmployeeProvider } from "./src/context/EmployeeContext";
+import { Provider } from "react-redux";
+import store from "./src/store";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <EmployeeProvider>
+    // Redux provider
+    <Provider store={store}>
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen
@@ -40,6 +42,6 @@ export default function App() {
           />
         </Stack.Navigator>
       </NavigationContainer>
-    </EmployeeProvider>
+    </Provider>
   );
 }

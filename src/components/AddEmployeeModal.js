@@ -8,7 +8,12 @@ import {
   Pressable,
   Alert,
 } from "react-native";
-import { useEmployees } from "../context/EmployeeContext";
+import {
+  addEmployee,
+  saveEmployeesToStorage,
+  useEmployees,
+} from "../context/employeesSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const AddEmployeeModal = ({ modalVisible, setModalVisible }) => {
   // local state for input fields
@@ -16,16 +21,30 @@ const AddEmployeeModal = ({ modalVisible, setModalVisible }) => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
 
-  // accessing the updateEmployees function from context
-  const { updateEmployees } = useEmployees();
+  const dispatch = useDispatch();
+
+  const employees = useSelector((state) => state.employees.employees);
+
+  const resetModalForm = () => {
+    setFirstName("");
+    setLastName("");
+    setEmail("");
+  };
 
   // function to handle form submission
   const handleAddEmployee = () => {
     if (firstName && lastName && email) {
       // add employee using the context function
-      updateEmployees(firstName, lastName, email);
+      dispatch(addEmployee({ firstName, lastName, email }));
+      dispatch(
+        saveEmployeesToStorage([
+          ...employees,
+          { firstName, lastName, email, tasks: [] },
+        ])
+      );
       // close the modal
       setModalVisible(!modalVisible);
+      resetModalForm();
     } else {
       // show an alert if any field is missing
       Alert.alert(

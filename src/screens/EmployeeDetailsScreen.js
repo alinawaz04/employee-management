@@ -10,19 +10,27 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { useEmployees } from "../context/EmployeeContext";
+import dayjs from "dayjs";
+import {
+  saveEmployeesToStorage,
+  useEmployees,
+} from "../context/employeesSlice";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import RatingModal from "../components/RatingModal";
 import TaskList from "../components/TaskList";
+import { useDispatch, useSelector } from "react-redux";
+import { updateEmployeeTasks } from "../context/employeesSlice";
 
 const EmployeeDetailsScreen = ({ route }) => {
   const { id } = route.params; // get employee id from route params
-  const { employees, updateEmployeeTasks } = useEmployees(); // use employee context to receive employees and ability to update employee tasks
+
+  const dispatch = useDispatch(); // dispatch to call actions
+  const employees = useSelector((state) => state.employees.employees);
 
   const employee = employees.find((emp) => emp.id === id); // find employee by id
 
   // local state for tasks
-  const [tasks, setTasks] = useState(employee.tasks);
+  const [tasks, setTasks] = useState(employee?.tasks || []);
 
   // state for modal visibility
   const [modalVisible, setModalVisible] = useState(false);
@@ -47,8 +55,10 @@ const EmployeeDetailsScreen = ({ route }) => {
   // sync local state "tasks" with global state "employee.tasks"
   // whenever "employee.tasks" changes.
   useEffect(() => {
-    setTasks(employee.tasks);
-  }, [employee.tasks]);
+    if (employee?.tasks) {
+      setTasks(employee.tasks);
+    }
+  }, [employee?.tasks]);
 
   // function to reset modal state to defaults
   const resetModalState = () => {
@@ -79,8 +89,8 @@ const EmployeeDetailsScreen = ({ route }) => {
 
   // function to add data from modal to tasks state and global state in context
   const addTask = (title, startDate, endDate, description) => {
-    const formattedStart = formatDate(startDate);
-    const formattedEnd = formatDate(endDate);
+    const formattedStart = startDate.toString();
+    const formattedEnd = endDate.toString();
     const newTasks = [
       ...tasks,
       {
@@ -94,9 +104,19 @@ const EmployeeDetailsScreen = ({ route }) => {
 
     // set screen state
     setTasks(newTasks);
+    updateEmployeeAndStorage(newTasks);
+  };
 
-    // set global state
-    updateEmployeeTasks(employee.id, newTasks);
+  // function to handle updating the employee's tasks and save to storage
+  const updateEmployeeAndStorage = (updatedTasks) => {
+    dispatch(updateEmployeeTasks({ id: employee.id, newTasks: updatedTasks }));
+    dispatch(
+      saveEmployeesToStorage(
+        employees.map((emp) =>
+          emp.id === employee.id ? { ...emp, tasks: updatedTasks } : emp
+        )
+      )
+    );
   };
 
   // handle different scenarios of saving a task
@@ -137,8 +157,8 @@ const EmployeeDetailsScreen = ({ route }) => {
 
   // update task in screen state and global state
   const updateTask = (taskId, title, startDate, endDate, description) => {
-    const formattedStart = formatDate(startDate);
-    const formattedEnd = formatDate(endDate);
+    const formattedStart = startDate.toString();
+    const formattedEnd = endDate.toString();
     const newTasks = tasks.map((task) =>
       task.id === taskId
         ? {
@@ -152,8 +172,7 @@ const EmployeeDetailsScreen = ({ route }) => {
     );
     // update screen tasks state
     setTasks(newTasks);
-    // update global tasks state in context
-    updateEmployeeTasks(employee.id, newTasks);
+    updateEmployeeAndStorage(newTasks);
   };
 
   // function to open completion modal for a task
@@ -174,7 +193,7 @@ const EmployeeDetailsScreen = ({ route }) => {
         : task
     );
     setTasks(updatedTasks);
-    updateEmployeeTasks(employee.id, updatedTasks);
+    updateEmployeeAndStorage(updatedTasks);
   };
 
   return (

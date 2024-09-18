@@ -10,8 +10,8 @@ const EmployeeList = ({ data }) => {
   // AsyncStorage.clear();
 
   // function to check id an employee has incomplete and overdue tasks
-  const checkOverdueTasks = (tasks) => {
-    let overdue;
+  const checkOverdueTasks = (tasks = []) => {
+    let overdue = false;
     tasks.forEach((task) => {
       // check incomplete tasks only
       if (!task.completed) {
@@ -31,7 +31,7 @@ const EmployeeList = ({ data }) => {
     <View>
       {data.map((employee) => {
         const overdue = checkOverdueTasks(employee.tasks);
-        const activeTasks = employee.tasks.filter((task) => !task.completed);
+        const activeTasks = employee.tasks?.filter((task) => !task.completed);
         return (
           <TouchableOpacity
             key={employee.id}
@@ -55,10 +55,12 @@ const EmployeeList = ({ data }) => {
               {/* if employee has 5 or more active tasks: add red text color */}
               <Text
                 style={
-                  activeTasks.length >= 5 ? styles.alertTasks : styles.textStyle
+                  activeTasks?.length >= 5
+                    ? styles.alertTasks
+                    : styles.textStyle
                 }
               >
-                Active Tasks: {activeTasks.length}
+                Active Tasks: {activeTasks ? activeTasks.length : 0}
               </Text>
             </View>
           </TouchableOpacity>

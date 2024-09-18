@@ -1,5 +1,5 @@
-import { createContext, useState, useContext, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import uuid from "react-native-uuid";
 
@@ -242,70 +242,89 @@ const mockEmployees = [
   },
 ];
 
-// create context for components to read
-const EmployeeContext = createContext();
+// Async thunk for loading employees from AsyncStorage
+export const loadEmployeesFromStorage = createAsyncThunk(
+  "employees/loadFromStorage",
+  /**
+   * Asynchronously loads the list of employees from AsyncStorage.
+   * If no data is found in AsyncStorage, it falls back to mock data.
+   */
+  async () => {
+    const json = await AsyncStorage.getItem("employees");
+    return json != null ? JSON.parse(json) : mockEmployees;
+  }
+);
 
-// custom hook to utilize employee context from any file
-export const useEmployees = () => useContext(EmployeeContext);
+// Redux Thunk - Middleware - sits between dispatching action and store.
 
-// provider component to wrap around "App", providing state to entire app.
-export const EmployeeProvider = ({ children }) => {
-  const [employees, setEmployees] = useState(mockEmployees); // use mock data as default for testing
+// Async thunk for saving employees to AsyncStorage
+export const saveEmployeesToStorage = createAsyncThunk(
+  "employees/saveToStorage",
+  /**
+   * Asynchronously saves the list of employees to AsyncStorage.
+   */
+  async (employees) => {
+    await AsyncStorage.setItem("employees", JSON.stringify(employees));
+    return employees;
+  }
+);
 
-  // effect hook to load data from local storage when component mounts
-  useEffect(() => {
-    const loadEmployees = async () => {
-      try {
-        const json = await AsyncStorage.getItem("employees");
-        // set data to "json" if it is not empty, else set to mock data for testing
-        const data = json != null ? JSON.parse(json) : mockEmployees;
-        setEmployees(data);
-      } catch (err) {
-        console.error("Error loading data from local storage", err);
+/** Slice includes...
+ * Initial state
+ * Reducers - define how state in updated in response to actions
+ * Action creators (automatically generated) - functions that can be dispatched to trigger reducers
+ *  */
+const employeesSlice = createSlice({
+  name: "employees",
+  initialState: { employees: [], loading: false },
+  reducers: {
+    updateEmployeeTasks: (state, action) => {
+      const { id, newTasks } = action.payload;
+      const employee = state.employees.find((emp) => emp.id === id);
+      if (employee) {
+        employee.tasks = newTasks;
       }
-    };
+    },
+    addEmployee: (state, action) => {
+      const { firstName, lastName, email } = action.payload;
+      const newEmployee = {
+        id: uuid.v4(),
+        firstName,
+        lastName,
+        email,
+        tasks: [],
+      };
+      state.employees.push(newEmployee);
+    },
+  },
+  // handle external async thunks
+  extraReducers: (builder) => {
+    // Handle pending state when loading employees
+    builder
+      .addCase(loadEmployeesFromStorage.pending, (state) => {
+        state.loading = true;
+      })
+      // Handle successful loading of employees from storage
+      .addCase(loadEmployeesFromStorage.fulfilled, (state, action) => {
+        state.employees = action.payload;
+        state.loading = false;
+      })
+      // Handle failure to load employees from storage
+      .addCase(loadEmployeesFromStorage.rejected, (state, action) => {
+        state.loading = false;
+        console.error("Failed to load employees:", action.error);
+      })
+      // Handle successful saving of employees to storage
+      .addCase(saveEmployeesToStorage.fulfilled, (state, action) => {
+        state.employees = action.payload;
+      })
+      // Handle failure to save employees to storage
+      .addCase(saveEmployeesToStorage.rejected, (state, action) => {
+        console.error("Failed to save employees:", action.error);
+      });
+  },
+});
 
-    loadEmployees();
-  }, []);
+export const { updateEmployeeTasks, addEmployee } = employeesSlice.actions;
 
-  // function to set local storage
-  const saveEmployeesToStorage = async (data) => {
-    try {
-      await AsyncStorage.setItem("employees", JSON.stringify(data));
-    } catch (error) {
-      console.error("Error saving data to AsyncStorage", error);
-    }
-  };
-
-  // function to update tasks of a specific employee
-  const updateEmployeeTasks = (id, newTasks) => {
-    const updatedEmployeeTasks = employees.map((employee) =>
-      employee.id === id ? { ...employee, tasks: newTasks } : employee
-    );
-    setEmployees(updatedEmployeeTasks); // set global state
-    saveEmployeesToStorage(updatedEmployeeTasks); // set local storage
-  };
-
-  // function to update an employee
-  const updateEmployees = (firstName, lastName, email) => {
-    const newEmployee = {
-      id: uuid.v4(), // generates unique id for the new employee
-      firstName,
-      lastName,
-      email,
-      tasks: [], // initialize tasks with empty array
-    };
-    const updatedEmployees = [...employees, newEmployee];
-    setEmployees(updatedEmployees); // set global app state
-    saveEmployeesToStorage(updatedEmployees); // set local storage
-  };
-
-  // providing context values to children components (App)
-  return (
-    <EmployeeContext.Provider
-      value={{ employees, updateEmployeeTasks, updateEmployees }}
-    >
-      {children}
-    </EmployeeContext.Provider>
-  );
-};
+export default employeesSlice.reducer;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -6,15 +6,18 @@ import {
   Switch,
   TextInput,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 
 import EmployeeList from "../components/EmployeeList";
 import AddEmployeeModal from "../components/AddEmployeeModal";
-import { useEmployees } from "../context/EmployeeContext";
+import { useDispatch, useSelector } from "react-redux";
+import { loadEmployeesFromStorage } from "../context/employeesSlice";
 
 const EmployeeListScreen = () => {
   // get employees from global state
-  const { employees } = useEmployees();
+  const employees = useSelector((state) => state.employees.employees);
+  const dispatch = useDispatch();
 
   // search input state
   const [query, setQuery] = useState("");
@@ -24,6 +27,11 @@ const EmployeeListScreen = () => {
 
   // state for showing incomplete tasks only switch
   const [showIncompleteOnly, setShowIncompleteOnly] = useState(false);
+
+  // Load employees from AsyncStorage when the component mounts
+  useEffect(() => {
+    dispatch(loadEmployeesFromStorage());
+  }, [dispatch]); // ensure hook always has no missing dependencies
 
   const toggleSwitch = () => {
     setShowIncompleteOnly((prevState) => !prevState);
@@ -42,7 +50,7 @@ const EmployeeListScreen = () => {
   });
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <AddEmployeeModal
         modalVisible={showAddEmployeeModal}
         setModalVisible={setShowAddEmployeeModal}
@@ -75,7 +83,7 @@ const EmployeeListScreen = () => {
           <Text>Add Employee</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

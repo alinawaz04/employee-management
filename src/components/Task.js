@@ -1,7 +1,11 @@
 import React from "react";
 import { Text, View, StyleSheet, Pressable } from "react-native";
+import dayjs from "dayjs";
 
 const Task = ({ task, overdue, complete, editCallback, completeCallback }) => {
+  const formatDate = (date) => {
+    return dayjs(date).format("MM/DD/YYYY");
+  };
   return (
     <View
       // apply different styles based on task status (completed, overdue, active)
@@ -20,7 +24,7 @@ const Task = ({ task, overdue, complete, editCallback, completeCallback }) => {
         <Text style={styles.textStyle}>{task.title}</Text>
         <Text style={styles.textStyle}>{task.description}</Text>
         <Text style={styles.textStyle}>
-          {task.startDate} - {task.endDate}
+          {formatDate(task.startDate)} - {formatDate(task.endDate)}
         </Text>
       </View>
 
